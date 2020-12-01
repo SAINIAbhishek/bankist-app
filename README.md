@@ -13,3 +13,4 @@ Predefined accounts:<br>
 - Creating DOM Elements
 - Map, Reduce, filter - username, balance, balance summary
 - Login
+- Transfer amount 
