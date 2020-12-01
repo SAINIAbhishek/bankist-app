@@ -14,3 +14,4 @@ Predefined accounts:<br>
 - Map, Reduce, filter - username, balance, balance summary
 - Login
 - Transfer amount 
+- Close account - find index

@@ -5,6 +5,12 @@
 // BANKIST APP
 
 // Data
+const emptyAccount = {
+  owner: '',
+  movements: [],
+  interestRate: 0, // %
+}
+
 const account1 = {
   owner: 'Jonas Schmedtmann',
   movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
@@ -164,5 +170,25 @@ btnTransfer.addEventListener('click', function (event) {
     updateInterface(signupAccount);
   } else {
     alert('Invalid transfer. Please try again.');
+  }
+});
+
+// close account
+btnClose.addEventListener('click', function (event) {
+  event.preventDefault();
+  const closeUsername = inputCloseUsername.value.toLowerCase();
+  const closePin = Number(inputClosePin.value);
+  if (closeUsername === signupAccount.username.toLowerCase() && closePin === signupAccount.pin) {
+    const index = accounts.findIndex((account) => account['username'].toLowerCase() === closeUsername);
+    if (index !== -1) {
+      containerApp.style.opacity = '0';
+      updateInterface(emptyAccount);
+      inputCloseUsername.value = inputClosePin.value = '';
+      accounts.splice(index, 1);
+    } else {
+      alert('Could not found the account. Please try again.');
+    }
+  } else {
+    alert('Wrong credentials. Please try again.');
   }
 });
