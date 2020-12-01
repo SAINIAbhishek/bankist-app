@@ -76,36 +76,71 @@ const displayMovements = function (movements) {
     containerMovements.insertAdjacentHTML("afterbegin", html);
   });
 }
-displayMovements(account1.movements);
+// displayMovements(account1.movements);
 
 // Username
 const createUsername = function (accounts) {
  accounts.forEach((acc) => {
-   acc.userName = acc.owner.toLowerCase().split(' ').map(name => name[0]).join('').toUpperCase();
+   acc.username = acc.owner.toLowerCase().split(' ').map(name => name[0]).join('').toUpperCase();
  });
 }
 createUsername(accounts);
 
 // balance
-const calcAndDisplayBalance = function (account) {
-  const balance = account.movements.reduce((acc, curr) => {
+const calcAndDisplayBalance = function (movements) {
+  const balance = movements.reduce((acc, curr) => {
     return acc + curr;
   }, 0);
   labelBalance.textContent = balance + '€';
 };
-calcAndDisplayBalance(account1);
+// calcAndDisplayBalance(account1.movements);
 
 // balance summary
-const calcAndDisplaySummary = function (account) {
-  const incomes = account.movements.filter(mov => mov > 0).reduce((acc, income) => acc + income, 0);
+const calcAndDisplaySummary = function (movements, interestRate) {
+  const incomes = movements.filter(mov => mov > 0).reduce((acc, income) => acc + income, 0);
   labelSumIn.textContent = incomes + '€';
-  const spending = account.movements.filter(mov => mov < 0).reduce((acc, spend) => acc + spend, 0);
+  const spending = movements.filter(mov => mov < 0).reduce((acc, spend) => acc + spend, 0);
   labelSumOut.textContent = Math.abs(spending) + '€';
-  const interest = account.movements
+  const interest = movements
       .filter(mov => mov > 0)
-      .map((deposit) => (deposit * 1.2) /100)
+      .map((deposit) => (deposit * interestRate) /100)
       .filter(int => int >=1 )
       .reduce((acc, int) => acc + int, 0);
   labelSumInterest.textContent = interest + '€';
 }
-calcAndDisplaySummary(account1);
+// calcAndDisplaySummary(account1.movements, account1.interestRate);
+
+// login
+let signupAccount = null;
+btnLogin.addEventListener('click', function (event) {
+  event.preventDefault();
+  const inputUsername = inputLoginUsername.value.toLowerCase();
+  const inputPin = inputLoginPin.value.toLowerCase();
+  signupAccount = accounts.find((acc) => acc['username'].toLowerCase() === inputUsername);
+
+  if (signupAccount?.pin === Number(inputPin)) {
+    // welcome message
+    labelWelcome.textContent = `Welcome back, ${signupAccount.owner.split(' ')[0]}!`;
+
+    // display container
+    containerApp.style.opacity = '100';
+
+    // clear input fields
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginUsername.blur();
+    inputLoginPin.blur();
+
+    // display movements
+    displayMovements(signupAccount.movements);
+
+    // display balance
+    calcAndDisplayBalance(signupAccount.movements);
+
+    // display summary
+    calcAndDisplaySummary(signupAccount.movements, signupAccount.interestRate);
+  } else {
+    containerApp.style.opacity = '0';
+    alert('Wrong credentials. Please try again.');
+  }
+
+});
