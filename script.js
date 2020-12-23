@@ -192,3 +192,16 @@ btnClose.addEventListener('click', function (event) {
     alert('Wrong credentials. Please try again.');
   }
 });
+
+// request loan
+btnLoan.addEventListener('click', function (event) {
+  event.preventDefault();
+  const amount = inputLoanAmount.value;
+  if (amount && signupAccount.movements.some(mov => mov >= (amount * 0.1))) {
+    signupAccount.movements.push(amount);
+    updateInterface(signupAccount);
+    inputLoanAmount.value = '';
+  } else {
+    alert('Could not approved the requested loan. Please try with different amount.');
+  }
+});

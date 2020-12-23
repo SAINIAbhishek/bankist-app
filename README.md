@@ -15,3 +15,4 @@ Predefined accounts:<br>
 - Login
 - Transfer amount 
 - Close account - find index
+- Request loan - some
