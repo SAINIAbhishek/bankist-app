@@ -68,9 +68,10 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 // movements
-const displayMovements = function (account) {
+const displayMovements = function (account, sort = false) {
   containerMovements.innerHTML = '';
-  account.movements.forEach((mov, i) => {
+  const movements = sort ? account.movements.slice().sort((a, b) => a - b) : account.movements;
+  movements.forEach((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
     const html = `
     <div class="movements__row">
@@ -204,4 +205,11 @@ btnLoan.addEventListener('click', function (event) {
   } else {
     alert('Could not approved the requested loan. Please try with different amount.');
   }
+});
+
+// sort movements
+let toggleSort = false;
+btnSort.addEventListener('click', function (event) {
+  event.preventDefault();
+  displayMovements(signupAccount, toggleSort = !toggleSort);
 });
