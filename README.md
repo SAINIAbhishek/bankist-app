@@ -6,8 +6,6 @@ It's a course project. 'The Complete JavaScript Course 2020: From Zero to Expert
 Predefined accounts:<br>
 1. username: 'JS',  password: '1111'.<br>
 2. username: 'JD',  password: '2222'.<br>
-3. username: 'STW',  password: '3333'.<br>
-4. username: 'SS',  password: '4444'.<br>
 <hr>
 
 - Creating DOM Elements
