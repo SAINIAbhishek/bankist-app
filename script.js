@@ -100,11 +100,12 @@ const displayMovements = function (account, sort = false) {
   movements.forEach((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
     const transactionDate = displayDate(new Date(account.movementsDates[i]), false, account.locale);
+    const transactionAmount = formatCurrency(mov, account.currency, account.locale);
     const html = `
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
       <div class="movements__date">${transactionDate}</div>
-      <div class="movements__value">${mov.toFixed(2)}€</div>
+      <div class="movements__value">${transactionAmount}</div>
     </div>
   `;
     containerMovements.insertAdjacentHTML("afterbegin", html);
@@ -125,24 +126,38 @@ const calcAndDisplayBalance = function (account) {
   account.balance = account.movements.reduce((acc, curr) => {
     return acc + curr;
   }, 0);
-  labelBalance.textContent = account.balance.toFixed(2) + '€';
+  // labelBalance.textContent = account.balance.toFixed(2) + '€';
+  labelBalance.textContent = formatCurrency(account.balance, account.currency, account.locale);
 };
 // calcAndDisplayBalance(account1);
 
 // balance summary
 const calcAndDisplaySummary = function (account) {
   const incomes = account.movements.filter(mov => mov > 0).reduce((acc, income) => acc + income, 0);
-  labelSumIn.textContent = incomes.toFixed(2) + '€';
+  // labelSumIn.textContent = incomes.toFixed(2) + '€';
+  labelSumIn.textContent = formatCurrency(incomes, account.currency, account.locale);
+
   const spending = account.movements.filter(mov => mov < 0).reduce((acc, spend) => acc + spend, 0);
-  labelSumOut.textContent = Math.abs(spending).toFixed(2) + '€';
+  // labelSumOut.textContent = Math.abs(spending).toFixed(2) + '€';
+  labelSumOut.textContent = formatCurrency(spending, account.currency, account.locale);
+
   const interest = account.movements
       .filter(mov => mov > 0)
       .map((deposit) => (deposit * account.interestRate) /100)
       .filter(int => int >=1 )
       .reduce((acc, int) => acc + int, 0);
-  labelSumInterest.textContent = interest.toFixed(2) + '€';
+  // labelSumInterest.textContent = interest.toFixed(2) + '€';
+  labelSumInterest.textContent = formatCurrency(interest, account.currency, account.locale);
 }
 // calcAndDisplaySummary(account1);
+
+// format currency
+const formatCurrency = function (value, currency, locale = 'en-US') {
+  return Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency
+  }).format(value);
+}
 
 // return date & time
 const displayDate = function (date, showTime = true, locale = 'en-US') {
