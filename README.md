@@ -17,3 +17,4 @@ Predefined accounts:<br>
 - Movements - sort
 - Dates - calculate days passed, internationalizing. 
 - Currency - internationalizing. 
+- Timer

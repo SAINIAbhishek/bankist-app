@@ -228,7 +228,7 @@ const updateInterface = function (account) {
 }
 
 // login
-let signupAccount = null;
+let signupAccount, timer = null;
 btnLogin.addEventListener('click', function (event) {
   event.preventDefault();
   const inputUsername = inputLoginUsername.value.toLowerCase();
@@ -246,6 +246,7 @@ btnLogin.addEventListener('click', function (event) {
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginUsername.blur();
     inputLoginPin.blur();
+    resetTimer();
     updateInterface(signupAccount);
     labelDate.textContent = displayDate(new Date(), true, signupAccount.locale);
   } else {
@@ -278,6 +279,7 @@ btnTransfer.addEventListener('click', function (event) {
     inputTransferTo.blur();
     inputTransferAmount.blur();
     updateInterface(signupAccount);
+    resetTimer();
   } else {
     alert('Invalid transfer. Please try again.');
   }
@@ -295,6 +297,7 @@ btnClose.addEventListener('click', function (event) {
       updateInterface(emptyAccount);
       inputCloseUsername.value = inputClosePin.value = '';
       accounts.splice(index, 1);
+      resetTimer();
     } else {
       alert('Could not found the account. Please try again.');
     }
@@ -323,3 +326,36 @@ btnSort.addEventListener('click', function (event) {
   event.preventDefault();
   displayMovements(signupAccount, toggleSort = !toggleSort);
 });
+
+// timer
+const startLogoutTimer = function () {
+  let time = 600; // 10 min
+
+  const tick = function () {
+    const min = String(Math.trunc(time / 60)).padStart(2, 0);
+    const sec = String(time % 60).padStart(2, 0);
+
+    labelTimer.textContent = `${min}:${sec}`;
+
+    // stop interval and logout user.
+    if (time === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = 'Log in to get started';
+      containerApp.style.opacity = '0';
+    }
+
+    time--;
+  }
+
+  tick();
+  const timer = setInterval(tick, 1000);
+  return timer;
+}
+
+// reset timer
+const resetTimer = function () {
+  if (timer) {
+    clearInterval(timer);
+  }
+  timer = startLogoutTimer();
+}
