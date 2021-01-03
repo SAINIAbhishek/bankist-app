@@ -23,9 +23,9 @@ const account1 = {
     '2020-01-28T09:15:04.904Z',
     '2020-04-01T10:17:24.185Z',
     '2020-05-08T14:11:59.604Z',
-    '2020-05-27T17:01:17.194Z',
-    '2020-07-11T23:36:17.929Z',
-    '2020-07-12T10:51:36.790Z',
+    '2020-12-28T14:43:26.374Z',
+    '2020-12-30T18:49:59.371Z',
+    '2021-01-02T12:01:20.894Z',
   ],
   currency: 'EUR',
   locale: 'pt-PT', // de-DE
@@ -99,11 +99,12 @@ const displayMovements = function (account, sort = false) {
   const movements = sort ? account.movements.slice().sort((a, b) => a - b) : account.movements;
   movements.forEach((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
+    const transactionDate = displayDate(new Date(account.movementsDates[i]), false, account.locale);
     const html = `
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
-      <div class="movements__date">3 days ago</div>
-      <div class="movements__value">${mov}€</div>
+      <div class="movements__date">${transactionDate}</div>
+      <div class="movements__value">${mov.toFixed(2)}€</div>
     </div>
   `;
     containerMovements.insertAdjacentHTML("afterbegin", html);
@@ -124,24 +125,82 @@ const calcAndDisplayBalance = function (account) {
   account.balance = account.movements.reduce((acc, curr) => {
     return acc + curr;
   }, 0);
-  labelBalance.textContent = account.balance + '€';
+  labelBalance.textContent = account.balance.toFixed(2) + '€';
 };
 // calcAndDisplayBalance(account1);
 
 // balance summary
 const calcAndDisplaySummary = function (account) {
   const incomes = account.movements.filter(mov => mov > 0).reduce((acc, income) => acc + income, 0);
-  labelSumIn.textContent = incomes + '€';
+  labelSumIn.textContent = incomes.toFixed(2) + '€';
   const spending = account.movements.filter(mov => mov < 0).reduce((acc, spend) => acc + spend, 0);
-  labelSumOut.textContent = Math.abs(spending) + '€';
+  labelSumOut.textContent = Math.abs(spending).toFixed(2) + '€';
   const interest = account.movements
       .filter(mov => mov > 0)
       .map((deposit) => (deposit * account.interestRate) /100)
       .filter(int => int >=1 )
       .reduce((acc, int) => acc + int, 0);
-  labelSumInterest.textContent = interest + '€';
+  labelSumInterest.textContent = interest.toFixed(2) + '€';
 }
 // calcAndDisplaySummary(account1);
+
+// return date & time
+const displayDate = function (date, showTime = true, locale = 'en-US') {
+
+  // without internationalization
+  /*
+  const day = `${date.getDate()}`.padStart(2, 0);
+  const month = `${date.getMonth() + 1}`.padStart(2, 0);
+  const year = date.getFullYear();
+  const hour = `${date.getHours()}`.padStart(2, 0);
+  const min = `${date.getMinutes()}`.padStart(2, 0);
+
+  if (showTime) {
+    return `${day}/${month}/${year}, ${hour}:${min}`;
+  } else if (calcDaysPassed(date)) {
+    return calcDaysPassed(date);
+  }
+  return `${day}/${month}/${year}`;
+  */
+
+  // internationalization
+  let options = {
+    day: 'numeric',
+    year: 'numeric',
+    month: 'numeric'
+  }
+  if (showTime) {
+    options = {
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      year: 'numeric',
+      month: 'numeric',
+      //month: 'long',
+      // weekday: 'long',
+    }
+    return new Intl.DateTimeFormat(locale, options).format(date);
+  } else if (calcDaysPassed(date)) {
+    return calcDaysPassed(date);
+  }
+  return new Intl.DateTimeFormat(locale, options).format(date);
+}
+
+// calculate days passed
+const calcDaysPassed = function (date) {
+  const calc = (date1, date2) => {
+   return Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
+  }
+  const daysPassed = calc(new Date(), date);
+
+  if (daysPassed === 0) {
+    return 'today';
+  } else if (daysPassed === 1) {
+    return 'yesterday';
+  } else if (daysPassed <= 7) {
+    return `${daysPassed} days ago`;
+  }
+}
 
 // update user interface
 const updateInterface = function (account) {
@@ -173,6 +232,7 @@ btnLogin.addEventListener('click', function (event) {
     inputLoginUsername.blur();
     inputLoginPin.blur();
     updateInterface(signupAccount);
+    labelDate.textContent = displayDate(new Date(), true, signupAccount.locale);
   } else {
     containerApp.style.opacity = '0';
     alert('Wrong credentials. Please try again.');
@@ -189,8 +249,16 @@ btnTransfer.addEventListener('click', function (event) {
 
   if (amount > 0 && !!receiverAccount && amount <= signupAccount['balance']
       && receiverAccount.username !== signupAccount.username) {
+
+    // amount
     signupAccount.movements.push(-amount);
     receiverAccount.movements.push(amount);
+
+    // transaction date
+    signupAccount.movementsDates.push(new Date().toISOString());
+    receiverAccount.movementsDates.push(new Date().toISOString());
+
+    // update UI
     inputTransferTo.value = inputTransferAmount.value = '';
     inputTransferTo.blur();
     inputTransferAmount.blur();
@@ -223,9 +291,10 @@ btnClose.addEventListener('click', function (event) {
 // request loan
 btnLoan.addEventListener('click', function (event) {
   event.preventDefault();
-  const amount = inputLoanAmount.value;
+  const amount = Math.floor(inputLoanAmount.value);
   if (amount && signupAccount.movements.some(mov => mov >= (amount * 0.1))) {
     signupAccount.movements.push(amount);
+    signupAccount.movementsDates.push(new Date().toISOString());
     updateInterface(signupAccount);
     inputLoanAmount.value = '';
   } else {
